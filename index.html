@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" id="viewport-meta" content="width=device-width, initial-scale=1.0">
     <title>STUDIO BY REYNA | Architecture & Design</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
@@ -96,12 +96,36 @@
            ==================================================== */
         .contact-wrap { height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
         .email-link { font-family: 'Space Grotesk'; font-size: clamp(1.2rem, 5vw, 4rem); color: var(--accent); margin: 3rem 0; text-decoration: underline; }
+
+        /* Botón Vista de Escritorio (Solo Móvil) */
+        #desktop-toggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 30px;
+            font-family: 'Space Grotesk';
+            font-size: 10px;
+            letter-spacing: 1px;
+            z-index: 10000;
+            cursor: pointer;
+            display: none;
+            box-shadow: 0 5px 15px rgba(255,79,163,0.3);
+        }
+
+        @media (pointer: coarse) {
+            #desktop-toggle { display: block; cursor: auto; }
+        }
     </style>
 </head>
 <body>
 
     <div class="cursor"></div>
     <div class="cursor-follower"></div>
+    <button id="desktop-toggle" onclick="toggleDesktopMode()">VISTA ESCRITORIO</button>
 
     <header class="header">
         <div class="logo" onclick="showView('home')">STUDIO BY REYNA</div>
@@ -307,6 +331,25 @@
     </section>
 
     <script>
+        // Función de alternancia de vista de escritorio para móviles
+        let isDesktopMode = false;
+        function toggleDesktopMode() {
+            const viewport = document.getElementById('viewport-meta');
+            const btn = document.getElementById('desktop-toggle');
+            
+            if (!isDesktopMode) {
+                // Forzar ancho de escritorio (1280px)
+                viewport.setAttribute('content', 'width=1280, initial-scale=0.3, maximum-scale=2.0');
+                btn.innerText = "VISTA MÓVIL";
+                isDesktopMode = true;
+            } else {
+                // Volver a vista móvil responsiva
+                viewport.setAttribute('content', 'width=device-width, initial-scale=1.0');
+                btn.innerText = "VISTA ESCRITORIO";
+                isDesktopMode = false;
+            }
+        }
+
         function showView(viewId) {
             document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
             const target = document.getElementById(viewId);
