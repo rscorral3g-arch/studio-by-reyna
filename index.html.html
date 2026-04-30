@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STUDIO BY REYNA | Architecture & Design</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* ====================================================
+           CORE STYLES & VARIABLES
+           ==================================================== */
+        :root {
+            --primary: #000000;
+            --accent: #ff4fa3;
+            --white: #ffffff;
+            --bg-dark: #0a0a0a;
+            --grey: #111111;
+            --text-grey: #a0a0a0;
+            --transition-smooth: cubic-bezier(0.77, 0, 0.175, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; cursor: none; }
+        body { background-color: var(--primary); color: var(--white); font-family: 'Inter', sans-serif; overflow-x: hidden; line-height: 1.6; }
+        h1, h2, h3, h4, .logo { font-family: 'Space Grotesk', sans-serif; text-transform: uppercase; font-weight: 700; }
+        a { text-decoration: none; color: inherit; }
+
+        /* --- View Management --- */
+        .view { display: none; min-height: 100vh; width: 100%; opacity: 0; }
+        .view.active { display: block; opacity: 1; animation: fadeIn 0.8s forwards; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* --- Shared UI Components --- */
+        .cursor { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; position: fixed; pointer-events: none; z-index: 9999; mix-blend-mode: difference; }
+        .cursor-follower { width: 40px; height: 40px; border: 1px solid var(--accent); border-radius: 50%; position: fixed; pointer-events: none; z-index: 9998; transition: transform 0.15s ease-out; }
+
+        .header { position: fixed; top: 0; width: 100%; z-index: 1000; padding: 2rem 5%; backdrop-filter: blur(15px); display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); transition: 0.3s; }
+        .nav-links { display: flex; gap: 3rem; list-style: none; }
+        .nav-item { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 2px; cursor: pointer; position: relative; }
+        .nav-item::after { content: ''; position: absolute; width: 0; height: 1px; bottom: -5px; left: 0; background: var(--accent); transition: 0.3s; }
+        .nav-item:hover::after { width: 100%; }
+
+        .container { max-width: 1400px; margin: 0 auto; padding: 0 5%; }
+
+        /* ====================================================
+           SECTION STYLES (HOME, ABOUT, ARCHIVE)
+           ==================================================== */
+        .hero { height: 100vh; display: flex; align-items: center; justify-content: center; text-align: center; position: relative; overflow: hidden; }
+        .parallax-bg { position: absolute; inset: 0; background: url('https://res.cloudinary.com/dgtmrjxn7/image/upload/v1777565486/sketchphoto_inynph.jpg') center/cover; z-index: -1; filter: brightness(0.4); }
+        
+        .hero-contact-bg { 
+            position: absolute; bottom: 5%; width: 100%; 
+            display: flex; justify-content: space-around; 
+            opacity: 0.3; font-family: 'Space Grotesk'; 
+            font-size: 0.7rem; letter-spacing: 3px;
+        }
+
+        .hero h1 { font-size: clamp(3rem, 10vw, 8rem); line-height: 0.9; }
+
+        .about-split { display: grid; grid-template-columns: 1fr 1.2fr; gap: 8rem; padding: 10rem 0; align-items: start; }
+        .about-image img { width: 100%; filter: grayscale(100%); transition: 1s; }
+        .about-image:hover img { filter: grayscale(0%); }
+        .about-text p { font-size: 1.1rem; color: var(--text-grey); margin-bottom: 2rem; font-weight: 300; }
+
+        .archive-list { padding: 4rem 0; }
+        .project-row { 
+            display: grid; grid-template-columns: 0.5fr 1fr 1.5fr 1fr; 
+            padding: 3rem 0; border-bottom: 1px solid #222;
+            transition: 0.4s; cursor: pointer;
+            align-items: center;
+            gap: 2rem;
+        }
+        .project-row:hover { color: var(--accent); padding-left: 20px; }
+        .project-thumbnail { width: 100%; height: 250px; object-fit: cover; border: 1px solid #1a1a1a; filter: grayscale(100%); transition: 0.5s; }
+        .project-row:hover .project-thumbnail { filter: grayscale(0%); border-color: var(--accent); }
+
+        /* ====================================================
+           PROJECT DETAIL STYLES
+           ==================================================== */
+        .project-hero { height: 75vh; display: flex; align-items: flex-end; padding: 4rem 5%; position: relative; }
+        .project-hero::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); }
+        .project-hero h1 { position: relative; z-index: 2; font-size: clamp(2rem, 6vw, 5rem); }
+
+        .project-grid { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 6rem; padding: 8rem 0; }
+        .project-description p { margin-bottom: 1.5rem; color: var(--text-grey); font-size: 1.1rem; }
+        .project-specs { font-family: 'Space Grotesk'; font-size: 0.8rem; border-left: 1px solid var(--accent); padding-left: 2rem; height: fit-content; }
+        .project-specs p { margin-bottom: 1rem; color: var(--accent); }
+
+        .gallery-masonry { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; padding-bottom: 8rem; }
+        .gallery-masonry img { width: 100%; border: 1px solid #1a1a1a; transition: 0.5s; }
+        .gallery-masonry img:hover { border-color: var(--accent); transform: scale(1.02); }
+
+        /* ====================================================
+           VIEW: CONTACT
+           ==================================================== */
+        .contact-wrap { height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+        .email-link { font-family: 'Space Grotesk'; font-size: clamp(1.2rem, 5vw, 4rem); color: var(--accent); margin: 3rem 0; text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+    <div class="cursor"></div>
+    <div class="cursor-follower"></div>
+
+    <header class="header">
+        <div class="logo" onclick="showView('home')">STUDIO BY REYNA</div>
+        <ul class="nav-links">
+            <li class="nav-item" onclick="showView('projects-index')">Proyectos</li>
+            <li class="nav-item" onclick="showView('home')">Sobre Mí</li>
+            <li class="nav-item" onclick="showView('contact')">Contacto</li>
+        </ul>
+    </header>
+
+    <!-- VIEW: HOME + ABOUT -->
+    <section id="home" class="view active">
+        <div class="hero">
+            <div class="parallax-bg"></div>
+            <div class="hero-content">
+                <h1>STUDIO BY REYNA</h1>
+                <p style="letter-spacing: 5px; color: var(--text-grey); margin-top: 1rem;">ARCHITECTURE • HUMAN CENTERED DESIGN</p>
+                <div style="margin-top: 3rem; display: flex; gap: 1rem; justify-content: center;">
+                    <div class="nav-item" style="border: 1px solid var(--white); padding: 1rem 2rem;" onclick="showView('projects-index')">Explorar Proyectos</div>
+                </div>
+            </div>
+            <div class="hero-contact-bg">
+                <span>RSCORRAL3G@GMAIL.COM</span>
+                <span>CHIHUAHUA, MÉXICO</span>
+                <span>INSTAGRAM: @STUDIOBYREYNA</span>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="about-split">
+                <div class="about-image">
+                    <img src="https://res.cloudinary.com/dgtmrjxn7/image/upload/v1777565486/mephoto_zyochu.jpg" alt="Reyna Samantha Corral">
+                </div>
+                <div class="about-text">
+                    <h2 style="margin-bottom: 3rem; color: var(--accent);">Filosofía</h2>
+                    <p>Hola, soy Reyna Samantha Corral, nacida en Socorro, Nuevo México, y actualmente radico en Chihuahua, México. Curso el tercer año de la carrera de Arquitectura en Isthmus Norte, donde he fortalecido una visión del diseño centrada en las personas.</p>
+                    <p>Para mí, la arquitectura es una herramienta de servicio capaz de mejorar la calidad de vida y fortalecer el sentido de pertenencia. Me interesa diseñar espacios sensibles donde el usuario pueda conectar con la naturaleza y experimentar bienestar emocional.</p>
+                    <p>Fuera del ámbito académico, encuentro inspiración en las manualidades, la fotografía, el deporte y la música, observando detalles que enriquecen mi proceso creativo.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- VIEW: PROJECTS INDEX -->
+    <section id="projects-index" class="view">
+        <div class="container" style="padding-top: 12rem;">
+            <p style="color: var(--accent); letter-spacing: 5px;">ARCHIVOS</p>
+            <h1 style="font-size: clamp(3rem, 8vw, 6rem); margin-bottom: 4rem;">ÍNDICE DE OBRAS</h1>
+            
+            <div class="archive-list">
+                <div class="project-row" onclick="showView('project-bugambilias')">
+                    <span style="font-family: 'Space Grotesk'; color: #444;">2026</span>
+                    <img src="https://res.cloudinary.com/dgtmrjxn7/image/upload/v1777565483/1.1CCBUGAMBILIA_wc3g7h.jpg" class="project-thumbnail" alt="Miniatura Bugambilias">
+                    <h2>Centro Cultural Bugambilias</h2>
+                    <span style="text-align: right; letter-spacing: 2px;">CHIHUAHUA, MX</span>
+                </div>
+                <div class="project-row" onclick="showView('project-corazon')">
+                    <span style="font-family: 'Space Grotesk'; color: #444;">2026</span>
+                    <img src="https://res.cloudinary.com/dgtmrjxn7/image/upload/v1777565484/2.1DEPA_v2pfum.jpg" class="project-thumbnail" alt="Miniatura Corazón">
+                    <h2>Departamentos Corazón</h2>
+                    <span style="text-align: right; letter-spacing: 2px;">CHIHUAHUA, MX</span>
+                </div>
+                <div class="project-row" onclick="showView('project-baobab')">
+                    <span style="font-family: 'Space Grotesk'; color: #444;">2026</span>
+                    <img src="https://res.cloudinary.com/dgtmrjxn7/image/upload/v1777565486/3.5BAOBABRENDER1_omvgsm.jpg" class="project-thumbnail" alt="Miniatura Baobab">
+                    <h2>Escuela Baobab</h2>
+                    <span style="text-align: right; letter-spacing: 2px;">SÉGHIOU, SN</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- VIEW: PROJECT DETAIL (BUGAMBILIAS) -->
+    <section id="project-bugambilias" class="view">
+        <div class="project-hero" style="background: url('https://res.cloudinary.com/dgtmrjxn7/image/upload/v1777565483/1.1CCBUGAMBILIA_wc3g7h.jpg') center/cover fixed;">
+            <h1>CENTRO CULTURAL<br><span style="color:var(--accent)">BUGAMBILIAS</span></h1>
+        </div>
+        
+        <div class="container">
+            <div class="project-grid">
+                <div class="project-description">
+                    <h3 style="margin-bottom: 2rem; color: var(--accent);">Encuentro y Expresión Artística</h3>
+                    <p>El Centro Cultural Bugambilias es un espacio dedicado al encuentro, la expresión artística y la convivencia comunitaria. Su nombre retoma el simbolismo de las bugambilias: bienvenida, pasión, vitalidad, prosperidad y protección.</p>
+                    <p>Ubicado en Av. Paseo Bolívar 115, Zona Centro de Chihuahua, integra vegetación interior y una paleta cromática en tonos bugambilia, destacando el suelo de baldosas de barro que aporta identidad y calidez.</p>
+                    <p>El diseño respeta el contexto histórico al fusionar arquitectura antigua con elementos contemporáneos, como puertas corredizas que conectan talleres y áreas de exposición con la calle.</p>
+                </div>
+                <div class="project-specs">
+                    <p>UBICACIÓN: AV. PASEO BOLÍVAR 115, CHIHUAHUA</p>
+                    <p>AÑO: 2026</p>
+                    <p>ESTATUS: DISEÑO ARQUITECTÓNICO</p>
+                    <p>VISTAS: QUINTA TOUCHÉ & QUINTA GAMEROS</p>
+                </div>
+            </div>
+
+            <div class="gallery-masonry">
+                <img src="https://res.cloudinary.com/dgtmrjxn7/image/upload/v1777565483/1.1CCBUGAMBILIA_wc3g7h.jpg" alt="Portada">
+                <img src="https://res.cloudinary.com/dgtmrjxn7/image/upload/v1777565483/1.2CCPLANTAS_h9wfto.jpg" alt="Plantas">
+                <img src="https://res.cloudinary.com/dgtmrjxn7/image/upload/v1777565484/1.3CCCORTES_rhfbc8.jpg" alt="Cortes">
+                <img src="https://res.cloudinary.com/dgtmrjxn7/image/upload/v1777565483/1.4CCISO_szw5u2.jpg" alt="Isométrico">
+                <img src="https://res.cloudinary.com/dgtmrjxn7/image/upload/v1777565483/1.5CCRENDER1_xrpmt8.jpg" alt="Render 1">
+                <img src="https://res.cloudinary.com/dgtmrjxn7/image/upload/v1777565483/1.8CCRENDER4_gqahqz.jpg" alt="Render 4">
+                <img src="https://res.cloudinary.com/dgtmrjxn7/image/upload/v1777565484/1.6CCRENDER2_dywix2.jpg" alt="Render 2">
+                <img src="https://res.cloudinary.com/dgtmrjxn7/image/upload/v1777565483/1.7CCRENDER3_folzcu.jpg" alt="Render 3">
+            </div>
+        </div>
+    </section>
+
+    <!-- VIEW: PROJECT DETAIL (CORAZÓN) -->
+    <section id="project-corazon" class="view">
+        <div class="project-hero" style="background: url('https://res.cloudinary.com/dgtmrjxn7/image/upload/v1777565484/2.1DEPA_v2pfum.jpg') center/cover fixed;">
+            <h1>DEPARTAMENTOS<br><span style="color:var(--accent)">CORAZÓN</span></h1>
+        </div>
+        
+        <div class="container">
+            <div class="project-grid">
+                <div class="project-description">
+                    <h3 style="margin-bottom: 2rem; color: var(--accent);">Comunidad y Flexibilidad Habitacional</h3>
+                    <p>El proyecto propone un conjunto habitacional contemporáneo en la colonia Santa Rosa, Chihuahua, que replantea la vivienda colectiva al priorizar comunidad, convivencia y flexibilidad.</p>
+                    <p>En planta baja incorpora comercio para activar la calle, generar oportunidades económicas, fortalecer la seguridad y conectar a residentes con la ciudad.</p>
+                    <p>En el tercer nivel se ubica una amplia estancia común concebida como núcleo social: área de descanso, trabajo al aire libre y punto de encuentro cotidiano, fomentando una vida más colaborativa.</p>
+                    <p>Las viviendas integran tres áreas flexibles que pueden abrirse o cerrarse según las necesidades del usuario, adaptándose a descanso, trabajo, convivencia o crecimiento familiar.</p>
+                    <p>Más que departamentos, el proyecto busca crear una comunidad habitable donde la arquitectura impulse bienestar colectivo y nuevas formas de vivir en la ciudad.</p>
+                </div>
+                <div class="project-specs">
+                    <p>UBICACIÓN: COL. SANTA ROSA, CHIHUAHUA</p>
+                    <p>AÑO: 2026</p>
+                    <p>TIPOLOGÍA: VIVIENDA COLECTIVA / COMERCIO</p>
+                    <p>CONCEPTO: NÚCLEO SOCIAL Y FLEXIBILIDAD</p>
+                </div>
+            </div>
+
+            <div class="gallery-masonry">
+                <img src="https://res.cloudinary.com/dgtmrjxn7/image/upload/v1777565484/2.1DEPA_v2pfum.jpg" alt="Imagen 2.1">
+                <img src="https://res.cloudinary.com/dgtmrjxn7/image/upload/v1777565484/2.2DEPAPLANTAS_vcuaub.jpg" alt="Imagen 2.2">
+                <img src="https://res.cloudinary.com/dgtmrjxn7/image/upload/v1777565484/2.3DEPACORTES_u1ahr1.jpg" alt="Imagen 2.3 Cortes">
+                <img src="https://res.cloudinary.com/dgtmrjxn7/image/upload/v1777565484/2.3DEPAS_bv2dua.jpg" alt="Imagen 2.3 Detalles">
+                <img src="https://res.cloudinary.com/dgtmrjxn7/image/upload/v1777565484/2.4DEPA_aiaiem.jpg" alt="Imagen 2.4">
+                <img src="https://res.cloudinary.com/dgtmrjxn7/image/upload/v1777565484/2.5DEPA_nnxcfm.jpg" alt="Imagen 2.5">
+                <img src="https://res.cloudinary.com/dgtmrjxn7/image/upload/v1777565484/2.6DEPA_yepvqi.gif" alt="GIF 2.6">
+                <img src="https://res.cloudinary.com/dgtmrjxn7/image/upload/v1777565484/2.8DEPA_efpu6t.jpg" alt="Imagen 2.8">
+                <img src="https://res.cloudinary.com/dgtmrjxn7/image/upload/v1777565484/2.9DEPA_ranzsn.jpg" alt="Imagen 2.9">
+                <img src="https://res.cloudinary.com/dgtmrjxn7/image/upload/v1777565485/2.10DEPA_t3vdjg.jpg" alt="Imagen 2.10">
+                <img src="https://res.cloudinary.com/dgtmrjxn7/image/upload/v1777565485/2.11DEPA_wbohrz.jpg" alt="Imagen 2.11">
+                <img src="https://res.cloudinary.com/dgtmrjxn7/image/upload/v1777565485/2.12DEPA_gz8dby.jpg" alt="Imagen 2.12">
+                <img src="https://res.cloudinary.com/dgtmrjxn7/image/upload/v1777565485/2.13DEPA_zdh01l.jpg" alt="Imagen 2.13">
+                <img src="https://res.cloudinary.com/dgtmrjxn7/image/upload/v1777565485/2.14DEPA_s0xifi.jpg" alt="Imagen 2.14">
+            </div>
+        </div>
+    </section>
+
+    <!-- VIEW: PROJECT DETAIL (BAOBAB) -->
+    <section id="project-baobab" class="view">
+        <div class="project-hero" style="background: url('https://res.cloudinary.com/dgtmrjxn7/image/upload/v1777565486/3.5BAOBABRENDER1_omvgsm.jpg') center/cover fixed;">
+            <h1>ESCUELA<br><span style="color:var(--accent)">BAOBAB</span></h1>
+        </div>
+        
+        <div class="container">
+            <div class="project-grid">
+                <div class="project-description">
+                    <h3 style="margin-bottom: 2rem; color: var(--accent);">Transformación Social y Resiliencia</h3>
+                    <p>La Escuela Baobab responde a la realidad de Séghiou, Senegal, donde muchos niños abandonan la escuela por pobreza, trabajo infantil, falta de servicios básicos y clima extremo. Propone un espacio educativo digno y autosuficiente construido con materiales locales.</p>
+                    <p>Su sistema constructivo inicia con una estructura de madera y una gran cubierta ligera que brinda sombra y permite levantar muros de tapial. Esta cubierta también capta agua de lluvia hacia un pozo veneciano para enfrentar la escasez hídrica.</p>
+                    <p>El proyecto integra árboles frutales y una granja de gallinas para apoyar la nutrición infantil. Las aulas se orientan al río Casamance para aprovechar vistas, luz natural y relación con el paisaje. En el centro, un patio comunitario con un baobab simboliza vida, refugio y encuentro.</p>
+                    <p>Incluye áreas de juego, convivencia y biblioteca abierta a la comunidad. Su diseño pasivo genera ventilación cruzada y confort térmico sin sistemas mecánicos. Más que una escuela, es una plataforma de transformación social que une arquitectura, naturaleza y comunidad.</p>
+                </div>
+                <div class="project-specs">
+                    <p>UBICACIÓN: SÉGHIOU, SENEGAL</p>
+                    <p>AÑO: 2026</p>
+                    <p>MATERIALES: MADERA Y TAPIAL</p>
+                    <p>SISTEMA: DISEÑO PASIVO Y CAPTACIÓN PLUVIAL</p>
+                </div>
+            </div>
+
+            <div class="gallery-masonry">
+                <img src="https://res.cloudinary.com/dgtmrjxn7/image/upload/v1777565485/3.1BAOBAB_tcz7f6.jpg" alt="Baobab 3.1">
+                <img src="https://res.cloudinary.com/dgtmrjxn7/image/upload/v1777565486/3.2BAOBAB_btceww.jpg" alt="Baobab 3.2">
+                <img src="https://res.cloudinary.com/dgtmrjxn7/image/upload/v1777565486/3.3BAOBAB_tsznpe.jpg" alt="Baobab 3.3">
+                <img src="https://res.cloudinary.com/dgtmrjxn7/image/upload/v1777565486/3.4BAOBAB_dhkjpy.jpg" alt="Baobab 3.4">
+                <img src="https://res.cloudinary.com/dgtmrjxn7/image/upload/v1777565486/3.5BAOBABRENDER1_omvgsm.jpg" alt="Baobab Render 1">
+                <img src="https://res.cloudinary.com/dgtmrjxn7/image/upload/v1777565486/3.6BAOBABRENDER2_okzmuu.jpg" alt="Baobab Render 2">
+                <img src="https://res.cloudinary.com/dgtmrjxn7/image/upload/v1777565486/3.7BAOBABRENDER3_zdufio.jpg" alt="Baobab Render 3">
+                <img src="https://res.cloudinary.com/dgtmrjxn7/image/upload/v1777565486/3.8BAOBABRENDER4_b54dut.jpg" alt="Baobab Render 4">
+            </div>
+        </div>
+    </section>
+
+    <!-- VIEW: CONTACT -->
+    <section id="contact" class="view">
+        <div class="container">
+            <div class="contact-wrap">
+                <p style="letter-spacing: 5px; color: var(--text-grey);">CONTACTO</p>
+                <h1>¿TRABAJAMOS JUNTOS?</h1>
+                <a href="mailto:rscorral3g@gmail.com" class="email-link">RSCORRAL3G@GMAIL.COM</a>
+                
+                <div style="display: flex; gap: 4rem; margin-top: 2rem;">
+                    <a href="#" class="nav-item">Instagram</a>
+                    <a href="#" class="nav-item">Behance</a>
+                    <a href="#" class="nav-item">LinkedIn</a>
+                </div>
+                <p style="margin-top: 6rem; font-size: 0.6rem; color: #333; letter-spacing: 2px;">ISTHMUS NORTE • CHIHUAHUA, MÉXICO</p>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        function showView(viewId) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            const target = document.getElementById(viewId);
+            target.classList.add('active');
+            window.scrollTo(0, 0);
+            
+            const header = document.querySelector('.header');
+            if(viewId !== 'home') header.style.background = "rgba(0,0,0,0.9)";
+            else header.style.background = "transparent";
+        }
+
+        const cursor = document.querySelector('.cursor');
+        const follower = document.querySelector('.cursor-follower');
+
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+            follower.animate({
+                left: `${e.clientX - 20}px`,
+                top: `${e.clientY - 20}px`
+            }, { duration: 500, fill: "forwards" });
+        });
+
+        window.addEventListener('scroll', () => {
+            if(document.getElementById('home').classList.contains('active')) {
+                const scrolled = window.pageYOffset;
+                const parallax = document.querySelector('.parallax-bg');
+                if(parallax) parallax.style.transform = `translateY(${scrolled * 0.4}px)`;
+            }
+        });
+    </script>
+</body>
+</html>
